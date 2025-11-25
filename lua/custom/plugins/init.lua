@@ -62,7 +62,7 @@ return {
         require('hover').mouse()
       end, { desc = 'hover.nvim (mouse)' })
 
-      vim.o.mousemoveevent = true
+      vim.o.mousemoveevent = false
     end,
   },
 }
