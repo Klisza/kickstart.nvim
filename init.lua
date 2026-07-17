@@ -67,16 +67,24 @@ vim.o.splitbelow = true
 vim.o.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
+vim.cmd 'filetype plugin indent on'
+
+local c_indent_group = vim.api.nvim_create_augroup('CIndentSettings', { clear = true })
+
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'c', 'h' },
+  group = c_indent_group,
+  pattern = { 'c', 'cpp' },
   callback = function()
+    vim.opt_local.autoindent = true
+    vim.opt_local.cindent = true
+    vim.opt_local.indentexpr = ''
+
     vim.opt_local.tabstop = 8
     vim.opt_local.shiftwidth = 8
     vim.opt_local.softtabstop = 8
     vim.opt_local.expandtab = false
   end,
 })
-
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
 
@@ -109,6 +117,7 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+vim.keymap.set('n', '<leader>e', '<cmd>Explore<CR>', { desc = 'Open netrw file explorer' })
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
 -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
@@ -940,7 +949,7 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'c' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
