@@ -205,8 +205,9 @@ require('lazy').setup({
   -- options to `gitsigns.nvim`.
   --
   -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  {
     'lewis6991/gitsigns.nvim',
+
     opts = {
       signs = {
         add = { text = '+' },
@@ -216,9 +217,26 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
     },
-  },
 
-  -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
+    keys = {
+      {
+        '<leader>tg',
+        function()
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            local buf = vim.api.nvim_win_get_buf(win)
+
+            if vim.bo[buf].filetype == 'gitsigns-blame' then
+              vim.api.nvim_win_close(win, true)
+              return
+            end
+          end
+
+          require('gitsigns').blame()
+        end,
+        desc = 'Toggle Git blame sidebar',
+      },
+    },
+  }, -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle
   -- lazy loading plugins that don't need to be loaded immediately at startup.
