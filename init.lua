@@ -208,6 +208,8 @@ require('lazy').setup({
   {
     'lewis6991/gitsigns.nvim',
 
+    event = { 'BufReadPre', 'BufNewFile' },
+
     opts = {
       signs = {
         add = { text = '+' },
@@ -222,16 +224,33 @@ require('lazy').setup({
       {
         '<leader>tg',
         function()
-          for _, win in ipairs(vim.api.nvim_list_wins()) do
-            local buf = vim.api.nvim_win_get_buf(win)
+          local blame_win = vim.t.gitsigns_blame_win
 
-            if vim.bo[buf].filetype == 'gitsigns-blame' then
-              vim.api.nvim_win_close(win, true)
-              return
-            end
+          -- Close the existing blame sidebar
+          if blame_win and vim.api.nvim_win_is_valid(blame_win) then
+            vim.api.nvim_win_close(blame_win, true)
+            vim.t.gitsigns_blame_win = nil
+            return
+          end
+
+          -- Remember which windows existed before opening blame
+          local existing_windows = {}
+
+          for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+            existing_windows[win] = true
           end
 
           require('gitsigns').blame()
+
+          -- Gitsigns creates the blame window asynchronously
+          vim.defer_fn(function()
+            for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+              if not existing_windows[win] then
+                vim.t.gitsigns_blame_win = win
+                return
+              end
+            end
+          end, 100)
         end,
         desc = 'Toggle Git blame sidebar',
       },
